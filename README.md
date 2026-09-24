@@ -9,7 +9,8 @@
 
 ![Python](https://img.shields.io/badge/Python-numpy%20puro-81d4fa?style=flat-square&logo=python&logoColor=white&labelColor=060806)
 ![JavaScript](https://img.shields.io/badge/JavaScript-zero%20deps-81d4fa?style=flat-square&logo=javascript&logoColor=white&labelColor=060806)
-![Tests](https://img.shields.io/badge/tests-24%2F24%20passing-00e676?style=flat-square&labelColor=060806)
+![Solidity](https://img.shields.io/badge/Solidity-0.8.24-81d4fa?style=flat-square&logo=solidity&logoColor=white&labelColor=060806)
+![Tests](https://img.shields.io/badge/tests-78%2F78%20passing-00e676?style=flat-square&labelColor=060806)
 ![Gradcheck](https://img.shields.io/badge/gradcheck-1.4e--10-00e676?style=flat-square&labelColor=060806)
 ![License](https://img.shields.io/badge/license-MIT-00e676?style=flat-square&labelColor=060806)
 
@@ -71,13 +72,51 @@ depois você interroga a pirâmide (bits do XOR, medidas da flor,
 strings {e,1}) e vê o valor descer até a base a cada rodada:
 **[elevbit-ai.github.io/blockz10-neural](https://elevbit-ai.github.io/blockz10-neural/)**
 
+## Chat roteado pela pirâmide / Chat routed by the pyramid
+
+O site inclui um assistente **honesto por construção**: as respostas são
+pré-escritas (sobre o ecossistema Blockz10) e quem escolhe qual usar é a
+rede neural de blocos — a pergunta vira 10 features de famílias de
+palavras-chave, a pirâmide roda 3 rodadas e a intenção é o bloco da base
+onde o valor aterrissa (96% de acurácia em held-out; sem reconhecimento
+→ fallback explícito, a rede nunca inventa conteúdo). / The site ships
+an assistant **honest by construction**: answers are pre-written and the
+block network chooses which one to use — the question becomes 10
+keyword-family features, the pyramid runs 3 rounds and the intent is the
+base block where value lands (96% held-out accuracy; no recognition →
+explicit fallback, the network never invents content).
+
+## Inferência on-chain / On-chain inference
+
+[`contracts/BlockNetInference.sol`](contracts/BlockNetInference.sol) —
+a mesma rede em **ponto fixo puro** (BASE = 10⁹): o construtor **prova a
+conservação no deploy** (toda coluna de pesos precisa somar exatamente
+10⁹ ou o deploy reverte), a poeira de arredondamento vai para o bloco de
+origem (a regra do Block155Splitter) e qualquer coeficiente é
+inspecionável on-chain. O quantizador Python
+(`src/blockz10_neural/quantize.py`) reproduz o contrato **bit a bit** —
+14 testes Foundry com 10 vetores de paridade, e a quantização mantém
+100% de concordância com a rede float nas três tarefas (~957k gas por
+inferência). / The same network in **pure fixed point** (BASE = 10⁹):
+the constructor **proves conservation at deploy time** (every weight
+column must sum to exactly 10⁹ or deployment reverts), rounding dust
+goes to the origin block (the Block155Splitter rule) and every
+coefficient is inspectable on-chain. The Python quantizer reproduces the
+contract **bit for bit** — 14 Foundry tests with 10 parity vectors, and
+quantization keeps 100% agreement with the float network on all three
+tasks (~957k gas per inference).
+
 ## Uso rápido / Quick start
 
 ```bash
 git clone https://github.com/elevbit-ai/blockz10-neural
 cd blockz10-neural
 python tests/test_blocknet.py   # 17 tests passed.
-node tests/test_blocknet.mjs    # 7 tests passed (cross-language vector).
+python tests/test_chatbot.py    # 14 tests passed.
+python tests/test_quantize.py   #  8 tests passed.
+node tests/test_blocknet.mjs    #  7 tests passed (cross-language vector).
+node tests/test_chatbot.mjs     # 18 tests passed (router parity).
+forge test                      # 14 tests passed (on-chain parity).
 ```
 
 ```python
@@ -127,13 +166,17 @@ logits within **3.6 × 10⁻¹⁵**.
 blockz10-neural/
 ├── src/blockz10_neural/    # referência Python (numpy puro)
 │   ├── blocknet.py         # rede: forward, backprop manual, treino
-│   └── tasks.py            # XOR · Íris · padrões {e,1}
+│   ├── tasks.py            # XOR · Íris · padrões {e,1}
+│   ├── chatbot.py          # roteador de chat (10 famílias → 5 intenções)
+│   └── quantize.py         # ponto fixo 1e9, espelho bit a bit do contrato
 ├── src/js/blocknet.js      # espelho JavaScript (ES module, zero deps)
+├── contracts/              # BlockNetInference.sol — inferência on-chain
+├── test/                   # 14 testes Foundry (paridade Python → EVM)
 ├── data/iris.csv           # Fisher (1936), domínio público
-├── tests/                  # 24 testes (gradcheck + vetor cruzado Py→JS)
-├── docs/                   # site: laboratório de treino ao vivo + vídeo
+├── tests/                  # 64 testes Python/JS (gradcheck, vetores cruzados)
+├── docs/                   # site: laboratório + chat + vídeo
 ├── media/                  # vídeo explicativo + poster
-└── tools/                  # train_models.py · make_video.py
+└── tools/                  # train_models · train_chatbot · export_contract · make_video
 ```
 
 ## Limites honestos / Honest limits

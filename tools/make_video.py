@@ -245,10 +245,10 @@ save(img, 9.0)
 img, d = canvas()
 center(d, 64, "Rigor / Rigor", SANS_B(38), BLUE)
 pts = [
-    ("numpy puro + JavaScript zero-deps, espelhados", "pure numpy + zero-deps JavaScript, mirrored"),
-    ("JS reproduz o Python com diferen\u00e7a 3,6 \u00d7 10\u207b\u00b9\u2075", "JS reproduces Python within 3.6 \u00d7 10\u207b\u00b9\u2075"),
-    ("24 testes \u00b7 gradcheck \u00b7 vetor cruzado Py \u2192 JS", "24 tests \u00b7 gradcheck \u00b7 cross-language vector"),
-    ("~773 par\u00e2metros \u2014 tarefas pequenas, por design", "~773 parameters \u2014 small tasks, by design"),
+    ("numpy puro + JavaScript zero-deps + Solidity, espelhados", "pure numpy + zero-deps JavaScript + Solidity, mirrored"),
+    ("infer\u00eancia on-chain em ponto fixo \u2014 paridade bit a bit", "on-chain fixed-point inference \u2014 bit-for-bit parity"),
+    ("chat roteado pela pir\u00e2mide \u00b7 96% em held-out", "chat routed by the pyramid \u00b7 96% held-out"),
+    ("78 testes \u00b7 gradcheck 10\u207b\u00b9\u2070 \u00b7 vetores cruzados Py\u2192JS\u2192EVM", "78 tests \u00b7 gradcheck \u00b7 cross-language vectors"),
 ]
 y = 180
 for pt_, en in pts:

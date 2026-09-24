@@ -104,6 +104,21 @@ footer .sig{font-family:var(--mono);color:var(--blue-dim);margin-top:6px}
 [data-en]{display:none}
 html.en [data-pt]{display:none}
 html.en [data-en]{display:revert}
+.chatbox{background:#04120a;border:1px solid var(--line);border-radius:10px;height:420px;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px}
+.msg{max-width:82%;padding:11px 15px;border-radius:12px;font-size:.93rem;line-height:1.55}
+.msg.user{align-self:flex-end;background:#0a2436;border:1px solid #17435f;color:var(--txt);border-bottom-right-radius:3px}
+.msg.bot{align-self:flex-start;background:var(--panel);border:1px solid var(--line);color:var(--txt);border-bottom-left-radius:3px}
+.msg.bot .route{font-family:var(--mono);font-size:.72rem;color:var(--blue-dim);margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+.msg.bot a{color:var(--green)}
+.minipyr{display:flex;flex-direction:column;gap:2px;align-items:flex-start;margin-top:8px}
+.minipyr .r{display:flex;gap:2px}
+.minipyr .b{width:14px;height:14px;border-radius:2px;border:1px solid #1c2b20}
+.chatrow{display:flex;gap:10px;margin-top:14px}
+.chatrow input{flex:1;background:#04120a;border:1px solid var(--line);color:var(--txt);font-family:var(--sans);font-size:.95rem;padding:12px;border-radius:8px}
+.chatrow input:focus{outline:1px solid var(--blue)}
+.sugg{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.sugg button{background:none;border:1px solid var(--line);color:var(--grey);padding:6px 12px;border-radius:16px;cursor:pointer;font-size:.8rem}
+.sugg button:hover{border-color:var(--blue);color:var(--blue)}
 @media(max-width:640px){.hero{padding:52px 0 38px}.blk{width:40px;height:40px}.blk .v{font-size:.68rem}}
 </style>
 </head>
@@ -113,6 +128,7 @@ html.en [data-en]{display:revert}
   <span class="logo">«Blockz10 Neural»</span>
   <a class="item" href="#conceito" data-pt>Conceito</a><a class="item" href="#conceito" data-en>Concept</a>
   <a class="item" href="#lab" data-pt>Laboratório</a><a class="item" href="#lab" data-en>Lab</a>
+  <a class="item" href="#chat">Chat</a>
   <a class="item" href="#matematica" data-pt>Matemática</a><a class="item" href="#matematica" data-en>Math</a>
   <a class="item" href="#video" data-pt>Vídeo</a><a class="item" href="#video" data-en>Video</a>
   <a class="item" href="#autor" data-pt>Autor</a><a class="item" href="#autor" data-en>Author</a>
@@ -130,7 +146,7 @@ html.en [data-en]{display:revert}
   <p class="author">Joaquim Pedro de Morais Filho · j360074@hotmail.com · 2020–2026</p>
   <div class="badges">
     <span class="badge">16 blocos · 3 rodadas</span><span class="badge">numpy puro + JS</span>
-    <span class="badge">24/24 tests ✓</span><span class="badge">gradcheck 10⁻¹⁰</span><span class="badge">MIT License</span>
+    <span class="badge">78/78 tests ✓</span><span class="badge">gradcheck 10⁻¹⁰</span><span class="badge">MIT License</span>
   </div>
   <div>
     <a class="cta" href="#lab" data-pt>⚡ Treinar no navegador</a>
@@ -166,8 +182,8 @@ html.en [data-en]{display:revert}
 
 <section id="lab"><div class="wrap">
   <h2 data-pt># Laboratório — treine a rede ao vivo</h2><h2 data-en># Lab — train the network live</h2>
-  <p class="lead" data-pt>Isto é a implementação de referência rodando no seu navegador — o mesmo código, espelhado do numpy, que passa nos 24 testes do repositório. Escolha a tarefa, clique em <b>Treinar</b>, acompanhe a perda caindo e depois teste a rede: a pirâmide mostra onde o valor aterrissa a cada palpite.</p>
-  <p class="lead" data-en>This is the reference implementation running in your browser — the same code, mirrored from numpy, that passes the repo's 24 tests. Pick a task, click <b>Train</b>, watch the loss fall, then probe the network: the pyramid shows where value lands for every guess.</p>
+  <p class="lead" data-pt>Isto é a implementação de referência rodando no seu navegador — o mesmo código, espelhado do numpy, que passa nos 78 testes do repositório. Escolha a tarefa, clique em <b>Treinar</b>, acompanhe a perda caindo e depois teste a rede: a pirâmide mostra onde o valor aterrissa a cada palpite.</p>
+  <p class="lead" data-en>This is the reference implementation running in your browser — the same code, mirrored from numpy, that passes the repo's 78 tests. Pick a task, click <b>Train</b>, watch the loss fall, then probe the network: the pyramid shows where value lands for every guess.</p>
   <div class="demo">
     <div class="tabs">
       <button class="tab on" id="tab-xor" onclick="setTask('xor')">XOR</button>
@@ -188,6 +204,21 @@ html.en [data-en]{display:revert}
     <div class="pyr" id="pyr"></div>
     <div class="stat" id="pyr-note" style="text-align:center"></div>
     <div id="verdict" class="verdict" style="text-align:center"></div>
+  </div>
+</div></section>
+
+<section id="chat"><div class="wrap">
+  <h2 data-pt># Chat — a pirâmide roteia a conversa</h2><h2 data-en># Chat — the pyramid routes the conversation</h2>
+  <p class="lead" data-pt>Um assistente honesto por construção: as respostas são pré-escritas (sobre o ecossistema Blockz10), e quem decide qual resposta usar é a <b>rede neural de blocos</b> — sua pergunta vira 10 features de famílias de palavras-chave, a pirâmide redistribui o depósito por 3 rodadas e a intenção é o bloco da base onde o valor aterrissa. A rede nunca inventa conteúdo; quando não reconhece, ela diz. Roteador com 96% de acurácia em held-out; tudo roda no seu navegador.</p>
+  <p class="lead" data-en>An assistant honest by construction: the answers are pre-written (about the Blockz10 ecosystem), and the <b>block neural network</b> decides which one to use — your question becomes 10 keyword-family features, the pyramid redistributes the deposit for 3 rounds and the intent is the base block where value lands. The network never invents content; when it does not recognize a question, it says so. 96% held-out routing accuracy; everything runs in your browser.</p>
+  <div class="demo">
+    <div class="chatbox" id="chatbox"></div>
+    <div class="chatrow">
+      <input type="text" id="chat-in" maxlength="200" spellcheck="false">
+      <button class="act" onclick="chatSend()" data-pt>Enviar</button>
+      <button class="act" onclick="chatSend()" data-en>Send</button>
+    </div>
+    <div class="sugg" id="sugg"></div>
   </div>
 </div></section>
 
@@ -256,6 +287,7 @@ import { BlockNet, encodeInput, xorData, patternData, patternFeatures,
          makeString, irisData, LEVELS, BASE_IDX } from "./assets/blocknet.js";
 import { IRIS } from "./assets/iris-data.js";
 import { SPLIT } from "./assets/iris-split.js";
+import { INTENTS, ANSWERS, routeQuestion } from "./assets/chatbot.js";
 
 /* ---------- language ---------- */
 window.setLang = function(l){
@@ -487,8 +519,104 @@ function bestBase(logits){
   return BASE_IDX[best];
 }
 
+/* ---------- chat (routed by the pyramid) ---------- */
+let chatNet = null;
+const SUGGESTIONS = {
+  pt: ["O que é o Blockz10?", "Como funciona a loteria?", "eee11 vira o quê?",
+       "A pirâmide conserva o valor?", "A pirâmide consegue aprender?"],
+  en: ["What is Blockz10?", "How does the lottery work?", "What is the threshold bonus?",
+       "Does the split conserve value?", "Can the pyramid learn?"],
+};
+
+async function chatModel(){
+  if(!chatNet){
+    const d = await (await fetch('assets/models/chatbot.json')).json();
+    chatNet = BlockNet.fromDict(d);
+  }
+  return chatNet;
+}
+
+function addMsg(cls, html){
+  const box = $('chatbox');
+  const div = document.createElement('div');
+  div.className = 'msg ' + cls;
+  div.innerHTML = html;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+  return div;
+}
+
+function miniPyr(state, winIdx){
+  const shape = [[0],[1],[2,3],[4,5,6],[7,8,9,10],[11,12,13,14,15]];
+  const mx = Math.max(...state);
+  let html = '<div class="minipyr">';
+  for(const row of shape){
+    html += '<div class="r">';
+    for(const i of row){
+      const heat = state[i]/(mx+1e-12);
+      const col = i===winIdx ? 'background:#ffd54f;border-color:#ffd54f'
+        : `background:rgba(129,212,250,${(0.08+0.85*heat).toFixed(2)})`;
+      html += `<span class="b" style="${col}"></span>`;
+    }
+    html += '</div>';
+  }
+  return html + '</div>';
+}
+
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+window.chatSend = async function(){
+  const inp = $('chat-in');
+  const q = inp.value.trim();
+  if(!q) return;
+  inp.value = '';
+  addMsg('user', esc(q));
+  const think = addMsg('bot', `<span class="stat">${EN()?'the pyramid is routing…':'a pirâmide está roteando…'}</span>`);
+  const net = await chatModel();
+  await new Promise(r=>setTimeout(r, 350));
+  const { intent, confidence, trace } = routeQuestion(net, encodeInput, q);
+  const lang = EN() ? 'en' : 'pt';
+  let html;
+  if(intent === null){
+    html = esc(ANSWERS.fallback[lang]);
+    if(trace) html += `<div class="route">${EN()?'confidence too low':'confiança baixa demais'} (${(confidence*100).toFixed(0)}%) → fallback</div>`;
+  } else {
+    const key = INTENTS[intent];
+    const a = ANSWERS[key];
+    html = esc(a[lang]);
+    if(a.link) html += `<br><a href="${a.link}" target="_blank" rel="noopener">${a.link.replace('https://','')} ↗</a>`;
+    const finalState = trace[trace.length-1].map(r=>r[0]);
+    const winIdx = BASE_IDX[intent];
+    html += miniPyr(finalState, winIdx);
+    html += `<div class="route">${EN()?'routed by the pyramid':'roteado pela pirâmide'}: ${key} · ${EN()?'confidence':'confiança'} ${(confidence*100).toFixed(1)}% · ${EN()?'gold block = where value landed':'bloco dourado = onde o valor aterrissou'}</div>`;
+  }
+  think.innerHTML = html;
+  $('chatbox').scrollTop = $('chatbox').scrollHeight;
+};
+
+function chatBoot(){
+  const lang = EN() ? 'en' : 'pt';
+  $('chat-in').placeholder = EN() ? 'ask about the Blockz10 ecosystem…' : 'pergunte sobre o ecossistema Blockz10…';
+  $('sugg').innerHTML = '';
+  for(const s of SUGGESTIONS[lang]){
+    const b = document.createElement('button');
+    b.textContent = s;
+    b.onclick = ()=>{ $('chat-in').value = s; chatSend(); };
+    $('sugg').appendChild(b);
+  }
+  if(!$('chatbox').children.length)
+    addMsg('bot', EN()
+      ? 'Hello! I am routed by the block pyramid itself. Ask me about the Blockz10 concept, the {e,1} encoding, Lottery yourToken, Block 15/5 or the neural network.'
+      : 'Olá! Eu sou roteado pela própria pirâmide de blocos. Pergunte sobre o conceito Blockz10, a codificação {e,1}, a Lottery yourToken, o Block 15/5 ou a rede neural.');
+}
+$('chat-in').addEventListener('keydown', e=>{ if(e.key==='Enter') chatSend(); });
+
+const _setLang = window.setLang;
+window.setLang = function(l){ _setLang(l); chatBoot(); };
+
 /* ---------- boot ---------- */
 setTask('xor');
+chatBoot();
 </script>
 </body>
 </html>

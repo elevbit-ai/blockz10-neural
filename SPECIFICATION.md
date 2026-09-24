@@ -163,6 +163,40 @@ JSON; the JS mirror reproduces Python's logits within **3.6 × 10⁻¹⁵**
 | Dependências / Deps | numpy | nenhuma / none (ES module) |
 | Testes / Tests | `tests/test_blocknet.py` (17) | `tests/test_blocknet.mjs` (7, incl. vetor cruzado / cross vector) |
 
+## 9 · Extensões / Extensions (v1.1.0)
+
+### 9.1 Chat roteado / Routed chat
+
+Assistente de recuperação: respostas pré-escritas; o roteamento é a
+própria rede (10 famílias de palavras-chave → features → pirâmide →
+intenção no bloco da base; 5 intenções, 96% em held-out; sem hits ou
+confiança < 0,5 → fallback explícito). A rede nunca gera conteúdo. /
+Retrieval assistant: pre-written answers; the routing is the network
+itself (10 keyword families → features → pyramid → intent at the base
+block; 5 intents, 96% held-out; no hits or confidence < 0.5 → explicit
+fallback). The network never generates content.
+Implementação / implementation: `src/blockz10_neural/chatbot.py` ·
+`docs/assets/chatbot.js` (paridade testada / parity tested).
+
+### 9.2 Inferência on-chain / On-chain inference
+
+`contracts/BlockNetInference.sol` executa a inferência em ponto fixo
+puro (BASE = 10⁹): o construtor **reverte** se qualquer coluna de pesos
+não somar exatamente 10⁹ (conservação provada no deploy); a poeira de
+arredondamento da redistribuição vai ao bloco de origem (regra do
+Block155Splitter); todo coeficiente é inspecionável. O quantizador
+(`src/blockz10_neural/quantize.py`, arredondamento por maior resto)
+reproduz o contrato bit a bit — 14 testes Foundry, 10 vetores de
+paridade, ~957k gas por inferência — e mantém 100% de concordância com
+a rede float nas três tarefas. / Executes inference in pure fixed
+point (BASE = 10⁹): the constructor **reverts** unless every weight
+column sums to exactly 10⁹ (conservation proven at deploy); the
+redistribution rounding dust goes to the origin block (the
+Block155Splitter rule); every coefficient is inspectable. The quantizer
+(largest-remainder rounding) reproduces the contract bit for bit —
+14 Foundry tests, 10 parity vectors, ~957k gas per inference — and
+keeps 100% agreement with the float network on all three tasks.
+
 ---
 
 © 2020–2026 Joaquim Pedro de Morais Filho · Licença MIT / MIT License

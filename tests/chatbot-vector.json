@@ -1,0 +1,110 @@
+[
+ {
+  "q": "como funciona a loteria?",
+  "features": [
+   0.0,
+   0.0,
+   1.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "hits": 1,
+  "intent": 2,
+  "confidence": 1.0
+ },
+ {
+  "q": "what is the threshold bonus?",
+  "features": [
+   0.3333333333333333,
+   0.0,
+   0.0,
+   0.0,
+   0.6666666666666666,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "hits": 3,
+  "intent": 4,
+  "confidence": 1.0
+ },
+ {
+  "q": "eee11 vira o que?",
+  "features": [
+   0.0,
+   1.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "hits": 2,
+  "intent": 1,
+  "confidence": 1.0
+ },
+ {
+  "q": "quem criou o blockz10?",
+  "features": [
+   0.6666666666666666,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.3333333333333333,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "hits": 3,
+  "intent": 0,
+  "confidence": 0.9993308380158512
+ },
+ {
+  "q": "does the split conserve value?",
+  "features": [
+   0.0,
+   0.0,
+   0.0,
+   1.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "hits": 2,
+  "intent": 3,
+  "confidence": 0.9999999999997478
+ },
+ {
+  "q": "bom dia tudo bem?",
+  "features": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "hits": 0,
+  "intent": null,
+  "confidence": 0.0
+ }
+]

@@ -1,0 +1,125 @@
+# Trains the chat router and exports everything the site needs:
+#   docs/assets/models/chatbot.json  (the BlockNet router)
+#   docs/assets/chatbot.js           (families + answers + featurize/route)
+#   tests/chatbot-vector.json        (Python->JS parity vector)
+import json
+import sys
+from pathlib import Path
+
+import numpy as np
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
+
+from blockz10_neural import BlockNet, encode_input  # noqa: E402
+from blockz10_neural.chatbot import (  # noqa: E402
+    CONFIDENCE_FLOOR, FAMILIES, INTENTS, WORD_ONLY, dataset, featurize, route,
+)
+
+# --- train -------------------------------------------------------------
+ftr, ytr, fte, yte = dataset()
+net = BlockNet(5, rounds=3, seed=155)
+net.train(ftr, ytr, steps=3000, lr=0.8)
+print(f"router train {net.accuracy(ftr, ytr):.1%} · test {net.accuracy(fte, yte):.1%}")
+net.save(ROOT / "docs" / "assets" / "models" / "chatbot.json")
+
+# --- answers (site content, bilingual) -----------------------------------
+ANSWERS = {
+    "conceito": {
+        "pt": "«Blockz10» é o sistema criado por Joaquim Pedro de Morais Filho em 2020: blocos discretos, uma estrutura fixa e uma regra local geram funções completas — o lema é “block system for creating other functions”. Do mesmo gesto nasceram a codificação {e,1}, a Lottery yourToken, a pirâmide Block 15/5 e a rede neural de blocos. O conceito é documentado desde a origem em blockz10.blogspot.com e registrado on-chain como NFT (coleção Blockz10 · OpenSea). Autor e contato: Joaquim Pedro de Morais Filho · j360074@hotmail.com.",
+        "en": "«Blockz10» is the system created by Joaquim Pedro de Morais Filho in 2020: discrete blocks, a fixed structure and a local rule generate complete functions — the motto is “block system for creating other functions”. The {e,1} encoding, Lottery yourToken, the Block 15/5 pyramid and the block neural network were all born from that same gesture. The concept has been documented since its origin at blockz10.blogspot.com and is registered on-chain as an NFT (Blockz10 collection · OpenSea). Author and contact: Joaquim Pedro de Morais Filho · j360074@hotmail.com.",
+        "link": "https://github.com/elevbit-ai/blockz10",
+    },
+    "codificacao": {
+        "pt": "Na codificação Blockz10, sequências de “e” viram um dígito de contagem e “1” permanece literal: eee11 → 311, sem perda. Como “e” e “1” são dígitos hexadecimais válidos, uma string {e,1} de 64 caracteres é ao mesmo tempo uma chave Ethereum sintaticamente válida e uma mensagem comprimível (64 → ~54 símbolos). Atenção: essa chave tem 64 bits de entropia — descobrível por design, para puzzles e loterias; nunca use para custódia real. Há um encoder ao vivo no site do Blockz10.",
+        "en": "In the Blockz10 encoding, runs of “e” become a counting digit and “1” stays literal: eee11 → 311, lossless. Since “e” and “1” are valid hexadecimal digits, a 64-character {e,1} string is simultaneously a syntactically valid Ethereum key and a compressible message (64 → ~54 symbols). Note: such a key carries 64 bits of entropy — discoverable by design, for puzzles and lotteries; never use it for real custody. There is a live encoder on the Blockz10 site.",
+        "link": "https://elevbit-ai.github.io/blockz10/#encoder",
+    },
+    "lottery": {
+        "pt": "A Lottery yourToken é uma caça ao tesouro criptográfica: uma carteira-prêmio pública tem a chave privada encriptada com uma senha de 30 caracteres — publicada embaralhada (anagrama). Qualquer pessoa aumenta o prêmio depositando tokens ERC-20; quem descobrir a ordem correta decripta a chave (PBKDF2 + HMAC, verificação offline) e leva tudo. A composição do anagrama é o dial de dificuldade: de 30! ≈ 2,65×10³² ordens a puzzles de fim de semana. Há uma demo jogável no site.",
+        "en": "Lottery yourToken is a cryptographic treasure hunt: a public prize wallet has its private key encrypted with a 30-character password — published shuffled (an anagram). Anyone grows the prize by depositing ERC-20 tokens; whoever finds the correct ordering decrypts the key (PBKDF2 + HMAC, offline verification) and takes everything. The anagram's composition is the difficulty dial: from 30! ≈ 2.65×10³² orderings down to weekend puzzles. There is a playable demo on the site.",
+        "link": "https://elevbit-ai.github.io/lottery-yourtoken/",
+    },
+    "piramide": {
+        "pt": "O Block 15/5 é a anti-pirâmide: 15 blocos de valor 10 em 5 níveis, mais a origem valendo 0 — total 150. Cada nível divide seu total entre níveis receptores e a soma sempre retorna; a poeira de arredondamento é rastreada, não perdida. Ao contrário da pirâmide financeira, o sistema é fechado, o topo vale zero e o valor flui para a base. Existe contrato Solidity oficial (Block155Splitter, split conservativo de ETH/ERC-20 com poeira → origem) e a versão com pesos aprendíveis (Block155Learn).",
+        "en": "Block 15/5 is the anti-pyramid: 15 value-10 blocks in 5 levels plus the origin at 0 — total 150. Each level divides its total among receptor levels and the sum always returns; rounding dust is tracked, never lost. Unlike a financial pyramid, the system is closed, the top holds zero and value flows to the base. There is an official Solidity contract (Block155Splitter, conservative ETH/ERC-20 splitting with dust → origin) and a learnable-weights version (Block155Learn).",
+        "link": "https://github.com/elevbit-ai/block155-contract",
+    },
+    "neural": {
+        "pt": "O Blockz10 Neural prova que a pirâmide aprende: a redistribuição entre blocos é a camada linear (softmax por coluna — colunas somam 1, valor nunca é criado nem destruído) e o bônus por limiar é a não-linearidade (o mesmo “joelho” do ReLU). Retropropagação manual em numpy puro, verificada por diferenças finitas (erro máx 1,4×10⁻¹⁰). Resultados: XOR 100%, Íris 93,3%, padrões {e,1} 100%, com ~773 parâmetros. Você pode treinar tudo ao vivo no laboratório desta página — e esta conversa mesma é roteada pela pirâmide.",
+        "en": "Blockz10 Neural proves the pyramid learns: redistribution between blocks is the linear layer (column-softmax — columns sum to 1, value is never created or destroyed) and the threshold bonus is the nonlinearity (the exact ReLU kink). Manual backpropagation in pure numpy, verified against finite differences (max error 1.4×10⁻¹⁰). Results: XOR 100%, Iris 93.3%, {e,1} patterns 100%, with ~773 parameters. You can train everything live in this page's lab — and this very conversation is routed by the pyramid.",
+        "link": "https://github.com/elevbit-ai/blockz10-neural",
+    },
+    "fallback": {
+        "pt": "Sou o assistente do ecossistema Blockz10 — minhas respostas são roteadas pela própria rede neural de blocos, então respondo dentro do que ela foi treinada para reconhecer. Pergunte sobre: o conceito do Blockz10, a codificação {e,1}, a Lottery yourToken, a pirâmide Block 15/5 (e o contrato), ou a rede neural.",
+        "en": "I am the Blockz10 ecosystem assistant — my answers are routed by the block neural network itself, so I answer within what it was trained to recognize. Ask me about: the Blockz10 concept, the {e,1} encoding, Lottery yourToken, the Block 15/5 pyramid (and its contract), or the neural network.",
+        "link": None,
+    },
+}
+
+# --- export the JS module (data + featurize/route, mirroring Python) -------
+js = f"""/*
+ * Blockz10 Chat — data + routing helpers (generated by tools/train_chatbot.py;
+ * the keyword families mirror src/blockz10_neural/chatbot.py exactly).
+ * Author: Joaquim Pedro de Morais Filho <j360074@hotmail.com> · MIT
+ */
+
+export const INTENTS = {json.dumps(INTENTS)};
+export const FAMILIES = {json.dumps(FAMILIES, ensure_ascii=False)};
+export const WORD_ONLY = new Set({json.dumps(sorted(WORD_ONLY))});
+export const CONFIDENCE_FLOOR = {CONFIDENCE_FLOOR};
+export const ANSWERS = {json.dumps(ANSWERS, ensure_ascii=False, indent=1)};
+
+export function normalize(text) {{
+  return text.toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "");
+}}
+
+export function featurize(question) {{
+  const t = normalize(question);
+  const words = new Set(t.replace(/[?!.,]/g, " ").split(/\\s+/));
+  const hits = new Array(FAMILIES.length).fill(0);
+  FAMILIES.forEach((fam, i) => {{
+    for (const kw of fam) {{
+      if (WORD_ONLY.has(kw)) {{ if (words.has(kw)) hits[i]++; }}
+      else if (t.includes(kw)) hits[i]++;
+    }}
+  }});
+  const total = hits.reduce((a, b) => a + b, 0);
+  return {{ features: hits.map(h => h / Math.max(1, total)), totalHits: total }};
+}}
+
+// net: a BlockNet from blocknet.js; returns {{intent, confidence, trace}}.
+export function routeQuestion(net, encodeInput, question) {{
+  const {{ features, totalHits }} = featurize(question);
+  if (totalHits === 0) return {{ intent: null, confidence: 0, trace: null }};
+  const X = encodeInput([features]);
+  const {{ logits, xs }} = net.forward(X, true);
+  const B = logits.map(r => r[0]);
+  const mx = Math.max(...B);
+  const z = B.map(v => Math.exp(v - mx));
+  const s = z.reduce((a, b) => a + b, 0);
+  let best = 0;
+  for (let c = 1; c < B.length; c++) if (B[c] > B[best]) best = c;
+  const conf = z[best] / s;
+  if (conf < CONFIDENCE_FLOOR) return {{ intent: null, confidence: conf, trace: xs }};
+  return {{ intent: best, confidence: conf, trace: xs }};
+}}
+"""
+(ROOT / "docs" / "assets" / "chatbot.js").write_text(js, encoding="utf-8")
+print("docs/assets/chatbot.js written")
+
+# --- parity vector -----------------------------------------------------------
+probe_qs = [
+    "como funciona a loteria?", "what is the threshold bonus?",
+    "eee11 vira o que?", "quem criou o blockz10?",
+    "does the split conserve value?", "bom dia tudo bem?",
+]
+vec = []
+for q in probe_qs:
+    f, hits = featurize(q)
+    intent, conf = route(net, q)
+    vec.append({"q": q, "features": f.tolist(), "hits": hits,
+                "intent": intent, "confidence": conf})
+with open(ROOT / "tests" / "chatbot-vector.json", "w", encoding="utf-8") as fp:
+    json.dump(vec, fp, ensure_ascii=False, indent=1)
+print("tests/chatbot-vector.json written")
