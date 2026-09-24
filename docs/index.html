@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blockz10 Neural — a neural network built only from blocks</title>
+<meta name="description" content="Blockz10 Neural: uma rede neural construída somente de blocos — redistribuição conservativa + bônus por limiar da pirâmide Block 15/5. Treine XOR, Íris e padrões {e,1} ao vivo no navegador. Por Joaquim Pedro de Morais Filho.">
+<meta name="author" content="Joaquim Pedro de Morais Filho">
+<meta property="og:title" content="Blockz10 Neural">
+<meta property="og:description" content="A genuine neural network built only from Blockz10 blocks — train it live in your browser.">
+<meta property="og:image" content="assets/poster.png">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='10' y='10' width='80' height='80' fill='none' stroke='%2381d4fa' stroke-width='12'/><text x='50' y='68' font-size='46' text-anchor='middle' fill='%2381d4fa' font-family='monospace'>N</text></svg>">
+<style>
+:root{
+  --bg:#060806; --panel:#0c110d; --line:#1c2b20;
+  --green:#00e676; --green-dim:#6ec896; --txt:#ebebeb; --grey:#9aa79e;
+  --blue:#81d4fa; --blue-dim:#6e9fc8; --gold:#ffd54f; --red:#f44336;
+  --mono:'Consolas','Courier New',monospace;
+  --sans:'Segoe UI',system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+a{color:var(--green);text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:1060px;margin:0 auto;padding:0 22px}
+header{position:sticky;top:0;z-index:9;background:rgba(6,8,6,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav{display:flex;align-items:center;gap:16px;height:60px;flex-wrap:wrap}
+.logo{font-family:var(--mono);font-weight:700;font-size:1.1rem;color:var(--blue)}
+nav a.item{color:var(--grey);font-size:.92rem}
+nav a.item:hover{color:var(--blue);text-decoration:none}
+.spacer{flex:1}
+.lang button{background:none;border:1px solid var(--line);color:var(--grey);padding:4px 12px;cursor:pointer;font-family:var(--mono);border-radius:4px 0 0 4px}
+.lang button+button{border-radius:0 4px 4px 0;border-left:none}
+.lang button.on{color:#04121c;background:var(--blue);border-color:var(--blue);font-weight:700}
+.hero{padding:80px 0 56px;text-align:center}
+.hero h1{font-family:var(--mono);font-size:clamp(2rem,5.5vw,3.6rem);color:var(--blue);letter-spacing:.02em}
+.hero .tag{font-size:clamp(1.05rem,2.6vw,1.4rem);margin-top:14px}
+.hero .sub{color:var(--grey);margin-top:8px;max-width:800px;margin-left:auto;margin-right:auto}
+.hero .author{margin-top:28px;color:var(--green-dim);font-family:var(--mono);font-size:.95rem}
+.badges{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:24px}
+.badge{border:1px solid var(--line);background:var(--panel);padding:6px 14px;border-radius:20px;font-size:.82rem;color:var(--grey);font-family:var(--mono)}
+.cta{display:inline-block;margin-top:32px;background:var(--blue);color:#04121c;font-weight:700;padding:13px 30px;border-radius:6px;font-size:1.02rem}
+.cta:hover{filter:brightness(1.12);text-decoration:none}
+.cta.ghost{background:none;border:1px solid var(--blue);color:var(--blue);margin-left:10px}
+section{padding:60px 0;border-top:1px solid var(--line)}
+h2{font-family:var(--mono);color:var(--blue);font-size:1.7rem;margin-bottom:8px}
+.lead{color:var(--grey);margin-bottom:26px;max-width:800px}
+.lead b,.lead code{color:var(--txt)}
+code.k{font-family:var(--mono);color:var(--green)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:22px}
+.card h3{font-size:1.02rem;color:var(--txt);margin-bottom:8px}
+.card .k{font-family:var(--mono);color:var(--blue);font-size:.8rem;letter-spacing:.08em}
+.card p{color:var(--grey);font-size:.92rem}
+.eq{background:#04121c;border:1px solid var(--line);border-radius:8px;padding:16px 20px;font-family:var(--mono);color:var(--blue);margin:14px 0;overflow-x:auto;font-size:1rem}
+.eq .c{color:var(--grey);font-size:.85rem}
+.demo{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:26px;margin-top:24px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.tab{background:none;border:1px solid var(--line);color:var(--grey);padding:10px 20px;border-radius:8px;cursor:pointer;font-family:var(--mono);font-size:.95rem}
+.tab.on{background:var(--blue);color:#04121c;border-color:var(--blue);font-weight:700}
+.demo label{display:block;font-family:var(--mono);font-size:.85rem;color:var(--green-dim);margin:16px 0 8px}
+.row{display:flex;gap:12px;margin-top:14px;flex-wrap:wrap;align-items:center}
+button.act{background:var(--blue);color:#04121c;border:none;font-weight:700;padding:10px 22px;border-radius:6px;cursor:pointer;font-size:.95rem}
+button.act.sec{background:none;border:1px solid var(--blue);color:var(--blue)}
+button.act.grn{background:var(--green);color:#04140a}
+button.act:hover{filter:brightness(1.1)}
+button.act:disabled{opacity:.4;cursor:wait}
+.out{margin-top:14px;background:#04120a;border:1px solid var(--line);border-radius:6px;padding:14px;font-family:var(--mono);word-break:break-all;min-height:48px;color:var(--green);font-size:.92rem;white-space:pre-wrap}
+.stat{font-family:var(--mono);color:var(--grey);font-size:.85rem;margin-top:8px}
+canvas.curve{width:100%;height:160px;background:#04120a;border:1px solid var(--line);border-radius:6px;margin-top:10px}
+.pyr{display:flex;flex-direction:column;gap:8px;align-items:center;margin:18px 0 6px}
+.prow{display:flex;gap:8px}
+.blk{width:52px;height:52px;border:3px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--mono);font-size:.72rem;color:var(--grey);background:#04120a;border-radius:5px;transition:all .25s}
+.blk .v{font-weight:700;font-size:.82rem;color:var(--txt)}
+.blk.win{border-color:var(--gold);box-shadow:0 0 14px rgba(255,213,79,.35)}
+.blk.win .v{color:var(--gold)}
+.sliders{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:6px}
+.sliders div{background:#04120a;border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.sliders label{margin:0 0 6px;font-size:.78rem}
+.sliders input[type=range]{width:100%;accent-color:var(--blue)}
+.sliders .val{font-family:var(--mono);color:var(--blue);font-size:.85rem}
+input[type=text]{width:100%;background:#04120a;border:1px solid var(--line);color:var(--txt);font-family:var(--mono);font-size:.95rem;padding:11px;border-radius:6px}
+input[type=text]:focus{outline:1px solid var(--blue)}
+.verdict{font-family:var(--mono);font-size:1.15rem;margin-top:14px}
+.verdict .cls{color:var(--gold);font-weight:700}
+.xorbtns{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.xorbtns button{font-family:var(--mono);font-size:1rem;padding:14px 18px;background:#04120a;border:2px solid var(--line);color:var(--txt);border-radius:8px;cursor:pointer}
+.xorbtns button.on{border-color:var(--blue);color:var(--blue);font-weight:700}
+table.res{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.92rem;margin-top:14px}
+table.res th,table.res td{border:1px solid var(--line);padding:9px 12px;text-align:left}
+table.res th{color:var(--green-dim);background:#0a140e}
+table.res td.g{color:var(--green)}
+pre.code{background:#04120a;border:1px solid var(--line);border-radius:8px;padding:18px;overflow-x:auto;font-family:var(--mono);font-size:.88rem;color:var(--txt);margin-top:16px}
+pre.code .c{color:#5a7a66}.code .g{color:var(--green)}
+video{width:100%;border-radius:12px;border:1px solid var(--line);background:#000;display:block}
+.author-card{display:flex;gap:26px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:30px;flex-wrap:wrap}
+.avatar{width:92px;height:92px;border-radius:50%;background:#04121c;border:2px solid var(--blue);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:2.2rem;color:var(--blue);font-weight:700;flex-shrink:0}
+.author-card h3{font-size:1.3rem}
+.author-card .contact{font-family:var(--mono);color:var(--blue);margin-top:6px}
+.author-card p{color:var(--grey);margin-top:10px;font-size:.95rem;max-width:640px}
+footer{border-top:1px solid var(--line);padding:36px 0;text-align:center;color:var(--grey);font-size:.85rem}
+footer .sig{font-family:var(--mono);color:var(--blue-dim);margin-top:6px}
+[data-en]{display:none}
+html.en [data-pt]{display:none}
+html.en [data-en]{display:revert}
+@media(max-width:640px){.hero{padding:52px 0 38px}.blk{width:40px;height:40px}.blk .v{font-size:.68rem}}
+</style>
+</head>
+<body>
+
+<header><div class="wrap"><nav>
+  <span class="logo">«Blockz10 Neural»</span>
+  <a class="item" href="#conceito" data-pt>Conceito</a><a class="item" href="#conceito" data-en>Concept</a>
+  <a class="item" href="#lab" data-pt>Laboratório</a><a class="item" href="#lab" data-en>Lab</a>
+  <a class="item" href="#matematica" data-pt>Matemática</a><a class="item" href="#matematica" data-en>Math</a>
+  <a class="item" href="#video" data-pt>Vídeo</a><a class="item" href="#video" data-en>Video</a>
+  <a class="item" href="#autor" data-pt>Autor</a><a class="item" href="#autor" data-en>Author</a>
+  <span class="spacer"></span>
+  <span class="lang"><button id="btn-pt" class="on" onclick="setLang('pt')">PT</button><button id="btn-en" onclick="setLang('en')">EN</button></span>
+  <a class="item" href="https://github.com/elevbit-ai/blockz10-neural">GitHub ↗</a>
+</nav></div></header>
+
+<div class="hero wrap">
+  <h1>«Blockz10 Neural»</h1>
+  <p class="tag" data-pt>Uma rede neural construída somente de blocos</p>
+  <p class="tag" data-en>A neural network built only from blocks</p>
+  <p class="sub" data-pt>A pirâmide <a href="https://github.com/elevbit-ai/blockz10">Block 15/5</a> vira rede neural com as duas operações originais do sistema: <b>redistribuição conservativa</b> (a camada linear) e <b>bônus por limiar</b> (a não-linearidade). Treine XOR, Íris e padrões {e,1} ao vivo, no seu navegador.</p>
+  <p class="sub" data-en>The <a href="https://github.com/elevbit-ai/blockz10">Block 15/5</a> pyramid becomes a neural network with the system's two original operations: <b>conservative redistribution</b> (the linear layer) and <b>threshold bonus</b> (the nonlinearity). Train XOR, Iris and {e,1} patterns live, in your browser.</p>
+  <p class="author">Joaquim Pedro de Morais Filho · j360074@hotmail.com · 2020–2026</p>
+  <div class="badges">
+    <span class="badge">16 blocos · 3 rodadas</span><span class="badge">numpy puro + JS</span>
+    <span class="badge">24/24 tests ✓</span><span class="badge">gradcheck 10⁻¹⁰</span><span class="badge">MIT License</span>
+  </div>
+  <div>
+    <a class="cta" href="#lab" data-pt>⚡ Treinar no navegador</a>
+    <a class="cta" href="#lab" data-en>⚡ Train in the browser</a>
+    <a class="cta ghost" href="#video" data-pt>▶ Vídeo</a>
+    <a class="cta ghost" href="#video" data-en>▶ Video</a>
+  </div>
+</div>
+
+<section id="conceito"><div class="wrap">
+  <h2 data-pt># De regras fixas a pesos que aprendem</h2><h2 data-en># From fixed rules to weights that learn</h2>
+  <p class="lead" data-pt>Uma rede neural alterna duas operações: transformação linear e não-linearidade. A pirâmide Block 15/5 <b>sempre teve as duas</b> — só faltava deixá-las aprender. A rede não usa blocos: a rede <b>é</b> a pirâmide.</p>
+  <p class="lead" data-en>A neural network alternates two operations: linear transformation and nonlinearity. The Block 15/5 pyramid <b>always had both</b> — they just had to be allowed to learn. The network does not use blocks: the network <b>is</b> the pyramid.</p>
+  <div class="grid">
+    <div class="card"><div class="k">01 · ESTADO / STATE</div>
+      <h3 data-pt>16 blocos</h3><h3 data-en>16 blocks</h3>
+      <p data-pt>Origem + 15 blocos em 5 níveis. A entrada é um depósito: as features entram nos blocos dos níveis 1–4, sempre com o mesmo total.</p>
+      <p data-en>Origin + 15 blocks in 5 levels. The input is a deposit: features enter the level 1–4 blocks, always with the same total.</p></div>
+    <div class="card"><div class="k">02 · CAMADA / LAYER</div>
+      <h3 data-pt>Redistribuição aprendível</h3><h3 data-en>Learnable redistribution</h3>
+      <p data-pt>Cada rodada multiplica o estado por uma matriz 16×16 cujas colunas somam 1 (softmax por coluna): mistura valor sem nunca criar ou destruir — o invariante do Block155Learn.</p>
+      <p data-en>Each round multiplies the state by a 16×16 matrix whose columns sum to 1 (column-softmax): it mixes value without ever creating or destroying it — the Block155Learn invariant.</p></div>
+    <div class="card"><div class="k">03 · NÃO-LINEARIDADE</div>
+      <h3 data-pt>Bônus por limiar</h3><h3 data-en>Threshold bonus</h3>
+      <p data-pt>Blocos acima da média da pirâmide ganham bônus proporcional — a regra original de bônus/perda do 15/5. Matematicamente, é o mesmo "joelho" do ReLU das redes profundas.</p>
+      <p data-en>Blocks above the pyramid mean earn a proportional bonus — the original 15/5 bonus/loss rule. Mathematically it is the same "kink" as the ReLU of deep networks.</p></div>
+    <div class="card"><div class="k">04 · RESPOSTA / ANSWER</div>
+      <h3 data-pt>Lida na base</h3><h3 data-en>Read at the base</h3>
+      <p data-pt>Depois de 3 rodadas, o valor desce a pirâmide. A classe prevista é o bloco da base (nível 5) onde mais valor aterrissou — a resposta é onde o valor chega.</p>
+      <p data-en>After 3 rounds, value flows down the pyramid. The predicted class is the base block (level 5) where most value landed — the answer is where the value arrives.</p></div>
+  </div>
+</div></section>
+
+<section id="lab"><div class="wrap">
+  <h2 data-pt># Laboratório — treine a rede ao vivo</h2><h2 data-en># Lab — train the network live</h2>
+  <p class="lead" data-pt>Isto é a implementação de referência rodando no seu navegador — o mesmo código, espelhado do numpy, que passa nos 24 testes do repositório. Escolha a tarefa, clique em <b>Treinar</b>, acompanhe a perda caindo e depois teste a rede: a pirâmide mostra onde o valor aterrissa a cada palpite.</p>
+  <p class="lead" data-en>This is the reference implementation running in your browser — the same code, mirrored from numpy, that passes the repo's 24 tests. Pick a task, click <b>Train</b>, watch the loss fall, then probe the network: the pyramid shows where value lands for every guess.</p>
+  <div class="demo">
+    <div class="tabs">
+      <button class="tab on" id="tab-xor" onclick="setTask('xor')">XOR</button>
+      <button class="tab" id="tab-iris" onclick="setTask('iris')">Íris / Iris</button>
+      <button class="tab" id="tab-pat" onclick="setTask('pat')" data-pt>Padrões {e,1}</button>
+      <button class="tab" id="tab-pat2" onclick="setTask('pat')" data-en style="display:none">Patterns {e,1}</button>
+    </div>
+    <div class="stat" id="task-desc"></div>
+    <div class="row">
+      <button class="act" id="btn-train" onclick="trainTask()" data-pt>⚡ Treinar do zero no navegador</button>
+      <button class="act" id="btn-train-en" onclick="trainTask()" data-en>⚡ Train from scratch in the browser</button>
+      <button class="act sec" onclick="loadReference()" data-pt>Carregar pesos de referência</button>
+      <button class="act sec" onclick="loadReference()" data-en>Load reference weights</button>
+      <span class="stat" id="train-stat"></span>
+    </div>
+    <canvas class="curve" id="curve" width="1000" height="160"></canvas>
+    <div id="probe"></div>
+    <div class="pyr" id="pyr"></div>
+    <div class="stat" id="pyr-note" style="text-align:center"></div>
+    <div id="verdict" class="verdict" style="text-align:center"></div>
+  </div>
+</div></section>
+
+<section id="matematica"><div class="wrap">
+  <h2 data-pt># A matemática, sem esconder nada</h2><h2 data-en># The mathematics, nothing hidden</h2>
+  <p class="lead" data-pt>Uma inferência são 3 rodadas de duas equações. Só isso.</p>
+  <p class="lead" data-en>One inference is 3 rounds of two equations. That is all.</p>
+  <div class="eq">u = T·x <span class="c">— redistribuição / redistribution · T = softmax-coluna(θ) ⇒ Σcoluna = 1: conservação exata / exact conservation</span></div>
+  <div class="eq">x′ = u + g·relu(u − média(u)) <span class="c">— bônus por limiar / threshold bonus: o joelho não-linear / the nonlinear kink</span></div>
+  <div class="eq">classe = argmax( escala·x<sub>base</sub> + viés ) <span class="c">— leitura nos 5 blocos da base / readout at the 5 base blocks</span></div>
+  <p class="lead" style="margin-top:22px" data-pt>O treino é retropropagação escrita à mão em numpy puro (sem frameworks), atravessando o softmax por coluna, o bônus e a leitura — e verificada contra diferenças finitas com erro máximo de <b>1,4 × 10⁻¹⁰</b> na suíte de testes. Redes lineares-por-partes são aproximadores universais: com blocos suficientes, essa arquitetura aprende qualquer função contínua.</p>
+  <p class="lead" style="margin-top:22px" data-en>Training is backpropagation written by hand in pure numpy (no frameworks), through the column-softmax, the bonus and the readout — verified against finite differences with max error <b>1.4 × 10⁻¹⁰</b> in the test suite. Piecewise-linear networks are universal approximators: with enough blocks, this architecture learns any continuous function.</p>
+  <table class="res">
+    <tr><th data-pt>tarefa</th><th data-en>task</th><th data-pt>entrada</th><th data-en>input</th><th data-pt>classes</th><th data-en>classes</th><th data-pt>acurácia (teste)</th><th data-en>accuracy (test)</th></tr>
+    <tr><td>XOR</td><td>2 bits</td><td>2</td><td class="g">100%</td></tr>
+    <tr><td data-pt>Íris (Fisher, 1936)</td><td data-en>Iris (Fisher, 1936)</td><td data-pt>4 medidas da flor</td><td data-en>4 flower measurements</td><td>3</td><td class="g">93,3% (28/30)</td></tr>
+    <tr><td data-pt>Padrões {e,1}</td><td data-en>{e,1} patterns</td><td data-pt>6 features da codificação Blockz10</td><td data-en>6 features from the Blockz10 encoding</td><td>3</td><td class="g">100%</td></tr>
+  </table>
+  <p class="stat" style="margin-top:12px" data-pt>Íris: os 2 erros são exemplares classicamente ambíguos entre versicolor e virginica — honesto para uma rede de ~770 parâmetros. Todos os números saem de <code style="color:var(--green)">python tests/test_blocknet.py</code>.</p>
+  <p class="stat" style="margin-top:12px" data-en>Iris: the 2 misses are the classically ambiguous versicolor/virginica specimens — honest for a ~770-parameter network. Every number comes from <code style="color:var(--green)">python tests/test_blocknet.py</code>.</p>
+</div></section>
+
+<section id="video"><div class="wrap">
+  <h2 data-pt># Vídeo explicativo</h2><h2 data-en># Explainer video</h2>
+  <p class="lead" data-pt>Do Block 15/5 à rede que aprende: as duas operações, o treino e os resultados.</p>
+  <p class="lead" data-en>From Block 15/5 to the learning network: the two operations, the training and the results.</p>
+  <video controls preload="metadata" poster="assets/poster.png">
+    <source src="assets/neural-explainer.mp4" type="video/mp4">
+  </video>
+</div></section>
+
+<section id="uso"><div class="wrap">
+  <h2 data-pt># Uso rápido</h2><h2 data-en># Quick start</h2>
+  <pre class="code"><span class="c"># Python (numpy puro / pure numpy)</span>
+<span class="g">&gt;&gt;&gt;</span> from blockz10_neural import BlockNet, iris
+<span class="g">&gt;&gt;&gt;</span> f_tr, y_tr, f_te, y_te = iris()
+<span class="g">&gt;&gt;&gt;</span> net = BlockNet(n_classes=3, rounds=3)
+<span class="g">&gt;&gt;&gt;</span> net.train(f_tr, y_tr, steps=5000, lr=1.2)
+<span class="g">&gt;&gt;&gt;</span> net.accuracy(f_te, y_te)
+0.933</pre>
+  <p class="lead" style="margin-top:22px" data-pt>Implementações espelhadas em Python e JavaScript — o JS reproduz os logits do Python com diferença máxima de 3,6 × 10⁻¹⁵ (precisão de máquina). 24 testes. Código em <a href="https://github.com/elevbit-ai/blockz10-neural">github.com/elevbit-ai/blockz10-neural</a>.</p>
+  <p class="lead" style="margin-top:22px" data-en>Mirrored Python and JavaScript implementations — JS reproduces Python's logits within 3.6 × 10⁻¹⁵ (machine precision). 24 tests. Code at <a href="https://github.com/elevbit-ai/blockz10-neural">github.com/elevbit-ai/blockz10-neural</a>.</p>
+</div></section>
+
+<section id="autor"><div class="wrap">
+  <h2 data-pt># Autor</h2><h2 data-en># Author</h2>
+  <div class="author-card">
+    <div class="avatar">JP</div>
+    <div>
+      <h3>Joaquim Pedro de Morais Filho</h3>
+      <div class="contact">j360074@hotmail.com</div>
+      <p data-pt>Criador do sistema Blockz10 (2020) e do modelo Block 15/5 (2022), documentados desde a origem em <a href="https://blockz10.blogspot.com">blockz10.blogspot.com</a> e registrados on-chain como NFT (coleção Blockz10 · OpenSea). Blockz10 Neural é a terceira etapa da linha: regras fixas → pesos aprendíveis (Block155Learn) → rede que classifica.</p>
+      <p data-en>Creator of the Blockz10 system (2020) and the Block 15/5 model (2022), documented since origin at <a href="https://blockz10.blogspot.com">blockz10.blogspot.com</a> and registered on-chain as an NFT (Blockz10 collection · OpenSea). Blockz10 Neural is the third step of the line: fixed rules → learnable weights (Block155Learn) → a classifying network.</p>
+    </div>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <div data-pt>© 2020–2026 Joaquim Pedro de Morais Filho · Licença MIT · conceito registrado on-chain</div>
+  <div data-en>© 2020–2026 Joaquim Pedro de Morais Filho · MIT License · concept registered on-chain</div>
+  <div class="sig">«Blockz10 Neural» — the network is the pyramid</div>
+</div></footer>
+
+<script type="module">
+import { BlockNet, encodeInput, xorData, patternData, patternFeatures,
+         makeString, irisData, LEVELS, BASE_IDX } from "./assets/blocknet.js";
+import { IRIS } from "./assets/iris-data.js";
+import { SPLIT } from "./assets/iris-split.js";
+
+/* ---------- language ---------- */
+window.setLang = function(l){
+  document.documentElement.classList.toggle('en', l==='en');
+  document.getElementById('btn-pt').classList.toggle('on', l==='pt');
+  document.getElementById('btn-en').classList.toggle('on', l==='en');
+  try{localStorage.setItem('bzn-lang', l);}catch(e){}
+  describeTask(); renderProbe();
+};
+try{
+  const saved = localStorage.getItem('bzn-lang');
+  if(saved) setLang(saved);
+  else if((navigator.language||'').toLowerCase().indexOf('pt')!==0) setLang('en');
+}catch(e){}
+
+const $ = id => document.getElementById(id);
+const EN = () => document.documentElement.classList.contains('en');
+
+/* ---------- task registry ---------- */
+const iris = irisData(IRIS, 40, 155, SPLIT);
+const patTrain = patternData(60, 64, 155);
+const TASKS = {
+  xor: {
+    C: 2, steps: 2000, lr: 0.6,
+    data: () => { const {features, labels} = xorData(); return {features, labels}; },
+    classes: ["0", "1"],
+    descPT: "XOR — o teste clássico: 4 pontos que NENHUMA reta separa. Se a rede acerta 100%, a não-linearidade (o bônus por limiar) está funcionando de verdade.",
+    descEN: "XOR — the classic test: 4 points NO straight line can separate. If the network reaches 100%, the nonlinearity (the threshold bonus) is genuinely working.",
+  },
+  iris: {
+    C: 3, steps: 3000, lr: 1.2,
+    data: () => iris.train,
+    test: () => iris.test,
+    classes: ["setosa", "versicolor", "virginica"],
+    descPT: "Íris (Fisher, 1936) — 150 flores reais, 4 medidas, 3 espécies. Treino com 120, teste com 30 que a rede nunca viu.",
+    descEN: "Iris (Fisher, 1936) — 150 real flowers, 4 measurements, 3 species. Trained on 120, tested on 30 the network never saw.",
+  },
+  pat: {
+    C: 3, steps: 1500, lr: 0.6,
+    data: () => ({features: patTrain.features, labels: patTrain.labels}),
+    classes: ["blocos/runs", "alternado/altern.", "aleatório/random"],
+    descPT: "Padrões {e,1} — a rede lê 6 features extraídas da codificação Blockz10 (densidade de runs, compressão eee11→311, taxa de troca…) e reconhece a estrutura da string.",
+    descEN: "{e,1} patterns — the network reads 6 features extracted from the Blockz10 encoding (run density, eee11→311 compression, switch rate…) and recognizes the string's structure.",
+  },
+};
+let task = 'xor';
+let nets = { xor: null, iris: null, pat: null };
+let lossHist = [];
+
+window.setTask = function(t){
+  task = t;
+  for(const k of ['xor','iris','pat']) $('tab-'+k).classList.toggle('on', k===t);
+  $('tab-pat2').classList.toggle('on', t==='pat');
+  describeTask(); drawCurve([]); renderProbe(); buildPyr(null);
+  $('verdict').innerHTML=''; $('train-stat').textContent='';
+  $('pyr-note').textContent='';
+};
+function describeTask(){
+  $('task-desc').textContent = EN() ? TASKS[task].descEN : TASKS[task].descPT;
+}
+
+/* ---------- training ---------- */
+window.trainTask = async function(){
+  const t = TASKS[task];
+  const {features, labels} = t.data();
+  const net = new BlockNet(t.C, 3, 1.0, 155);
+  const b1=$('btn-train'), b2=$('btn-train-en');
+  b1.disabled = b2.disabled = true;
+  lossHist = [];
+  const t0 = performance.now();
+  await net.train(features, labels, { steps: t.steps, lr: t.lr,
+    every: 25,
+    onStep: async (step, loss) => {
+      lossHist.push(loss);
+      drawCurve(lossHist);
+      $('train-stat').textContent =
+        `${EN()?'step':'passo'} ${step+1}/${t.steps} · loss ${loss.toFixed(4)}`;
+      await new Promise(r => requestAnimationFrame(r));
+    }});
+  const secs = ((performance.now()-t0)/1000).toFixed(1);
+  nets[task] = net;
+  let msg = `${EN()?'trained in':'treinada em'} ${secs}s · `;
+  msg += `${EN()?'train acc':'acurácia treino'} ${(net.accuracy(features,labels)*100).toFixed(1)}%`;
+  if(t.test){
+    const te = t.test();
+    msg += ` · ${EN()?'TEST acc':'acurácia TESTE'} ${(net.accuracy(te.features,te.labels)*100).toFixed(1)}%`;
+  }
+  $('train-stat').textContent = msg;
+  b1.disabled = b2.disabled = false;
+  renderProbe();
+};
+
+window.loadReference = async function(){
+  const file = {xor:'xor', iris:'iris', pat:'patterns'}[task];
+  const d = await (await fetch(`assets/models/${file}.json`)).json();
+  nets[task] = BlockNet.fromDict(d);
+  $('train-stat').textContent = EN()
+    ? 'reference weights loaded (trained by the Python suite)'
+    : 'pesos de referência carregados (treinados pela suíte Python)';
+  drawCurve([]); renderProbe();
+};
+
+/* ---------- loss curve ---------- */
+function drawCurve(h){
+  const cv = $('curve'), ctx = cv.getContext('2d');
+  ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.strokeStyle = '#1c2b20'; ctx.strokeRect(0,0,cv.width,cv.height);
+  if(h.length < 2) return;
+  const max = Math.max(...h), min = Math.min(...h);
+  ctx.strokeStyle = '#81d4fa'; ctx.lineWidth = 2; ctx.beginPath();
+  h.forEach((v,i)=>{
+    const x = i/(h.length-1)*(cv.width-20)+10;
+    const y = cv.height-12-((v-min)/(max-min+1e-12))*(cv.height-24);
+    i ? ctx.lineTo(x,y) : ctx.moveTo(x,y);
+  });
+  ctx.stroke();
+  ctx.fillStyle = '#9aa79e'; ctx.font = '13px Consolas';
+  ctx.fillText(`loss ${h[h.length-1].toFixed(4)}`, 14, 18);
+}
+
+/* ---------- probe UIs ---------- */
+let xorState = [0, 0];
+const IRIS_RANGES = [[4.3,7.9,'sépala comp. / sepal len (cm)'],[2.0,4.4,'sépala larg. / sepal wid (cm)'],
+                     [1.0,6.9,'pétala comp. / petal len (cm)'],[0.1,2.5,'pétala larg. / petal wid (cm)']];
+let irisVals = [5.8, 3.0, 4.35, 1.3];
+let patStr = makeString(0, 64, Math.random);
+
+function renderProbe(){
+  const p = $('probe');
+  if(task === 'xor'){
+    p.innerHTML = `<label>${EN()?'INPUTS — click to flip the two bits':'ENTRADAS — clique para inverter os dois bits'}</label>
+      <div class="xorbtns">
+        <button id="xb0" class="${xorState[0]?'on':''}">bit A = ${xorState[0]}</button>
+        <button id="xb1" class="${xorState[1]?'on':''}">bit B = ${xorState[1]}</button>
+        <button class="act grn" id="xgo">${EN()?'→ Ask the pyramid':'→ Perguntar à pirâmide'}</button>
+      </div>`;
+    $('xb0').onclick = ()=>{ xorState[0]^=1; renderProbe(); };
+    $('xb1').onclick = ()=>{ xorState[1]^=1; renderProbe(); };
+    $('xgo').onclick = ()=>probe([Number(xorState[0]), Number(xorState[1])],
+                                  `A XOR B (${xorState[0]}⊕${xorState[1]})`);
+  } else if(task === 'iris'){
+    p.innerHTML = `<label>${EN()?'MEASUREMENTS — drag the sliders':'MEDIDAS — arraste os controles'}</label>
+      <div class="sliders">${IRIS_RANGES.map((r,d)=>`
+        <div><label>${r[2]}</label>
+        <input type="range" id="sl${d}" min="${r[0]}" max="${r[1]}" step="0.1" value="${irisVals[d]}">
+        <span class="val" id="sv${d}">${irisVals[d].toFixed(1)} cm</span></div>`).join('')}
+      </div>
+      <div class="row"><button class="act grn" id="igo">${EN()?'→ Classify the flower':'→ Classificar a flor'}</button></div>`;
+    IRIS_RANGES.forEach((r,d)=>{
+      $('sl'+d).oninput = e=>{ irisVals[d]=+e.target.value; $('sv'+d).textContent=irisVals[d].toFixed(1)+' cm'; };
+    });
+    $('igo').onclick = ()=>{
+      const f = irisVals.map((v,d)=>(v-iris.mins[d])/(iris.maxs[d]-iris.mins[d]));
+      probe(f, `[${irisVals.map(v=>v.toFixed(1)).join(', ')}] cm`);
+    };
+  } else {
+    p.innerHTML = `<label>${EN()?'STRING {e,1} — edit it, or generate one per class':'STRING {e,1} — edite, ou gere uma de cada classe'}</label>
+      <input type="text" id="pin" maxlength="64" spellcheck="false" value="${patStr}">
+      <div class="row">
+        <button class="act sec" id="g0">◈ ${EN()?'runs':'blocos'}</button>
+        <button class="act sec" id="g1">◈ ${EN()?'alternating':'alternado'}</button>
+        <button class="act sec" id="g2">◈ ${EN()?'random':'aleatório'}</button>
+        <button class="act grn" id="pgo">${EN()?'→ Recognize the pattern':'→ Reconhecer o padrão'}</button>
+      </div>`;
+    for(let c=0;c<3;c++) $('g'+c).onclick = ()=>{ patStr=makeString(c,64,Math.random); $('pin').value=patStr; };
+    $('pgo').onclick = ()=>{
+      const s = $('pin').value.trim();
+      if(!/^[e1]{8,64}$/.test(s)){ $('verdict').innerHTML=`<span style="color:var(--red)">⚠ {e,1} × 8–64</span>`; return; }
+      patStr = s;
+      probe(patternFeatures(s), s.slice(0,24)+'…');
+    };
+  }
+}
+
+/* ---------- pyramid visualization ---------- */
+function buildPyr(values, winIdx){
+  const el = $('pyr'); el.innerHTML='';
+  let idx = 0;
+  LEVELS.forEach((blocks, lv)=>{
+    const row = document.createElement('div'); row.className='prow';
+    blocks.forEach(i=>{
+      const b = document.createElement('div'); b.className='blk';
+      if(values){
+        const v = values[i]*150;
+        b.innerHTML = `<span class="v">${v.toFixed(1)}</span>`;
+        const heat = Math.min(1, values[i]*16*1.2);
+        b.style.borderColor = i===winIdx ? 'var(--gold)' : `rgba(129,212,250,${0.25+0.75*heat})`;
+        b.style.background = `rgba(129,212,250,${0.04+0.20*heat})`;
+        if(i===winIdx) b.classList.add('win');
+      } else {
+        b.innerHTML = `<span class="v">·</span>`;
+      }
+      row.appendChild(b);
+    });
+    el.appendChild(row);
+  });
+}
+buildPyr(null);
+
+async function probe(features, label){
+  const net = nets[task];
+  if(!net){
+    $('verdict').innerHTML = `<span style="color:var(--grey)">${EN()?'train the network first (or load reference weights)':'treine a rede primeiro (ou carregue os pesos de referência)'}</span>`;
+    return;
+  }
+  const X = encodeInput([features]);
+  const {logits, xs} = net.forward(X, true);
+  // animate: input state, then each round
+  const names = TASKS[task].classes;
+  for(let r=0; r<xs.length; r++){
+    const col = xs[r].map(row=>row[0]);
+    buildPyr(col, r===xs.length-1 ? bestBase(logits) : -1);
+    $('pyr-note').textContent = r===0
+      ? (EN()?'deposit: the input enters the pyramid':'depósito: a entrada entra na pirâmide')
+      : `${EN()?'round':'rodada'} ${r}/3 — ${EN()?'redistribution + threshold bonus':'redistribuição + bônus por limiar'}`;
+    await new Promise(res=>setTimeout(res, 550));
+  }
+  const B = logits.map(row=>row[0]);
+  let best = 0; for(let c=1;c<B.length;c++) if(B[c]>B[best]) best=c;
+  const z = B.map(v=>Math.exp(v-Math.max(...B)));
+  const sum = z.reduce((a,b)=>a+b,0);
+  const conf = (z[best]/sum*100).toFixed(1);
+  $('verdict').innerHTML =
+    `${label} → <span class="cls">${names[best]}</span> <span class="stat">(${EN()?'confidence':'confiança'} ${conf}%)</span>`;
+}
+function bestBase(logits){
+  const B = logits.map(row=>row[0]);
+  let best = 0; for(let c=1;c<B.length;c++) if(B[c]>B[best]) best=c;
+  return BASE_IDX[best];
+}
+
+/* ---------- boot ---------- */
+setTask('xor');
+</script>
+</body>
+</html>
